@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unique ID Link Generator</title>
+    <style>
+        body {
+            background-color: #2c2c2c;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+        input {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: none;
+            width: 300px;
+            text-align: center;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #submitButton {
+            background-color: #007BFF;
+            color: white;
+        }
+        #submitButton:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        #cancelButton {
+            background-color: #FF3B3B;
+            color: white;
+        }
+        #responseBox {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #444;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 600px;
+            text-align: left;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+    </style>
+    <script>
+        let cancelOperation = false;
+
+        function sendRequests() {
+            const uniqueId = document.getElementById("uniqueId").value;
+            const responseBox = document.getElementById("responseBox");
+            const submitButton = document.getElementById("submitButton");
+            const cancelButton = document.getElementById("cancelButton");
+            
+            if (!uniqueId) {
+                alert("Please enter a unique ID");
+                return;
+            }
+            
+            document.getElementById("uniqueId").value = ""; // Clear input box
+            submitButton.disabled = true; // Disable submit button
+            cancelButton.disabled = false; // Enable cancel button
+            responseBox.innerHTML = "Processing...";
+            cancelOperation = false;
+
+            const affIds = [
+                22, 111, 128, 244, 311, 286, 314, 299, 342, 335, 336, 367, 380, 349, 343, 387, 390, 430, 418, 458, 467, 422, 464, 442, 456, 460, 448, 466, 461, 451, 475, 480, 455, 477, 489, 490, 523, 520, 522, 524, 525, 534, 535, 492, 521, 530, 514, 517, 513, 533, 537, 559, 555, 567, 576, 580, 578, 606, 586, 574, 582, 583, 552, 577, 590, 607, 572, 595, 609, 543, 594, 608, 617, 634, 636, 656, 633, 631, 615, 616, 632, 635, 630, 670, 649, 639, 648, 682, 620, 669, 672, 663, 652, 644, 655, 660, 645, 686, 683, 675, 685, 671, 674, 673, 690, 689, 678, 703, 668, 691, 666, 694, 679, 695, 676, 729, 715, 696, 725, 709, 714, 711, 707, 692, 719, 693, 697, 700, 710, 699, 727, 716, 713, 724, 720, 712, 731, 701, 717, 728
+            ];
+
+            const masterLink = "https://platform-offerwall-production.joinklover.io/tune/04b0fc79-df07-40a1-942a-67a6dd29b5d2/track?offer_id=(aff_id placeholder)&offer_name=Nielsen+Surveys+-+English&offer_ref=23&goal_id=0&affiliate_id=1&source-testoffer&aff_click_id=&aff_unique1=(unique id placeholder)&aff_sub=ACTION_CONV&advertiser_id=44&datetime=2025-02-03+12%3A15%3A40&transaction_id=1021c8860ffab40e661d20e7bb2557&adv_sub=&device_os=&payout=0&adv_unique1=";
+            
+            let index = 0;
+
+            function sendNextRequest() {
+                if (cancelOperation) {
+                    responseBox.innerHTML += "<br>Operation cancelled.";
+                    submitButton.disabled = false;
+                    cancelButton.disabled = true;
+                    return;
+                }
+                
+                if (index >= affIds.length) {
+                    responseBox.innerHTML = "All requests completed.";
+                    submitButton.disabled = false;
+                    cancelButton.disabled = true;
+                    return;
+                }
+                
+                const affId = affIds[index];
+                const finalLink = masterLink.replace("(aff_id placeholder)", affId).replace("(unique id placeholder)", uniqueId);
+                
+                fetch(finalLink, { method: "GET" })
+                    .then(response => {
+                        responseBox.innerHTML += `<br>Sent GET for aff_id=${affId}: ${response.status}`;
+                        index++;
+                        sendNextRequest();
+                    })
+                    .catch(error => {
+                        responseBox.innerHTML += `<br>Error for aff_id=${affId}: ${error}`;
+                        index++;
+                        sendNextRequest();
+                    });
+            }
+            
+            sendNextRequest();
+        }
+
+        function cancelRequests() {
+            cancelOperation = true;
+        }
+    </script>
+</head>
+<body>
+    <h2>Enter Unique ID</h2>
+    <input type="text" id="uniqueId" placeholder="Enter unique ID">
+    <div class="button-container">
+        <button id="submitButton" onclick="sendRequests()">Submit</button>
+        <button id="cancelButton" onclick="cancelRequests()" disabled>Cancel</button>
+    </div>
+    <div id="responseBox"></div>
+</body>
+</html>
